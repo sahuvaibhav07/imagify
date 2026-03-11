@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react"
 import { Routes, Route } from "react-router-dom"
 import Home from "./pages/Home"
@@ -16,8 +17,20 @@ const App = () => {
         <Route path="/result" element={<Result />} />
         <Route path="/buy" element={<BuyCredit />} />
       </Routes>
+=======
+import React from 'react'
+
+const App = () => {
+  return (
+    <div>
+      
+>>>>>>> 60e22ffd06d408173c82f76ae1c8ac6b9c5c7df1
     </div>
   )
 }
 
+<<<<<<< HEAD
 export default App
+=======
+export default App
+>>>>>>> 60e22ffd06d408173c82f76ae1c8ac6b9c5c7df1
