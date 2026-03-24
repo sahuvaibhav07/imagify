@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { AppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ const Result = () => {
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    // 🔥 MAIN FIX (redirect)
+    
     if (credits === 0) {
       navigate("/buy");
       return;
@@ -43,7 +44,7 @@ const Result = () => {
     }
   };
 
-  // ✅ Download
+
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = image;
@@ -51,7 +52,7 @@ const Result = () => {
     link.click();
   };
 
-  // ✅ Generate Again
+
   const handleGenerateAnother = () => {
     setIsImageLoaded(false);
     setImage(assets.sample_img_1);
@@ -69,7 +70,12 @@ const Result = () => {
 
       {/* IMAGE */}
       <div className="relative">
-        <img src={image} alt="" className="max-w-sm rounded" />
+        {/* avoid appending ?t= to data URI (breaks image load) */}
+        <img
+          src={image.startsWith("data:") ? image : `${image}?t=${Date.now()}`}
+          alt=""
+          className="max-w-sm rounded"
+        />
 
         {loading && (
           <p className="absolute bottom-0 w-full text-center text-blue-500">

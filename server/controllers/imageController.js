@@ -30,7 +30,7 @@ const generateImage = async (req, res) => {
 
        const { data } = await axios.post("https://clipdrop-api.co/text-to-image/v1", formData, {
             headers: {
-                "X-API-Key": process.env.CLIPDROP_API,
+                "X-API-Key": process.env.CLIPDROP_API_KEY,
                 ...formData.getHeaders(),
             },
             responseType: "arraybuffer",

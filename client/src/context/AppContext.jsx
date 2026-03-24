@@ -41,27 +41,53 @@ const AppContextProvider = (props) => {
     }
   };
 
-  // ✅🔥 MAIN FIX (IMPORTANT)
+  // ✅🔥 Main generator implementation
   const generateImage = async (prompt) => {
     try {
+      if (!prompt || !prompt.trim()) {
+        toast.error("Please enter a valid prompt.");
+        return null;
+      }
 
-      // ❌ credits khatam
       if (credits <= 0) {
         toast.error("No credits left!");
         navigate("/buy");
         return null;
       }
 
-      // ✅ fake image
-      const fakeImage = "https://picsum.photos/500";
+      if (!token) {
+        toast.error("Please login before generating images.");
+        setShowLogin(true);
+        return null;
+      }
 
-      // ✅ credit minus
-      setCredits((prev) => prev - 1);
+      const { data } = await axios.post(
+        backendUrl + "/api/images/generate-image",
+        { prompt },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      return fakeImage;
+      if (!data.success || !data.resultImage) {
+        toast.error(data.message || "Failed to generate image.");
+        return null;
+      }
 
+      // sync credit state with backend
+      if (typeof data.creditBalance === "number") {
+        setCredits(data.creditBalance);
+      } else {
+        setCredits((prev) => prev - 1);
+      }
+
+      return data.resultImage;
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error(error.response?.data?.message || error.message || "Image generation error");
+      return null;
     }
   };
 
