@@ -10,9 +10,15 @@ const AppContextProvider = (props) => {
   const [user, setUser] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-
-  // ✅ FIX: number hona chahiye
   const [credits, setCredits] = useState(0);
+  const [imageHistory, setImageHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem("imageHistory");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -83,6 +89,20 @@ const AppContextProvider = (props) => {
         setCredits((prev) => prev - 1);
       }
 
+      // Add image to history
+      const newHistoryItem = {
+        id: Date.now(),
+        prompt,
+        image: data.resultImage,
+        timestamp: new Date().toISOString(),
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString()
+      };
+
+      const updatedHistory = [newHistoryItem, ...imageHistory];
+      setImageHistory(updatedHistory);
+      localStorage.setItem("imageHistory", JSON.stringify(updatedHistory));
+
       return data.resultImage;
     } catch (error) {
       console.error(error);
@@ -95,6 +115,30 @@ const AppContextProvider = (props) => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    navigate("/");
+    toast.success("Logged out successfully!");
+  };
+
+  // History management functions
+  const deleteHistoryItem = (id) => {
+    const updated = imageHistory.filter(item => item.id !== id);
+    setImageHistory(updated);
+    localStorage.setItem("imageHistory", JSON.stringify(updated));
+    toast.success("Image removed from history");
+  };
+
+  const clearHistory = () => {
+    setImageHistory([]);
+    localStorage.setItem("imageHistory", JSON.stringify([]));
+    toast.success("History cleared");
+  };
+
+  const downloadHistoryImage = (image, prompt) => {
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = `imagify-${prompt.slice(0, 20)}-${Date.now()}.png`;
+    link.click();
+    toast.success("Image downloaded!");
   };
 
   useEffect(() => {
@@ -116,6 +160,11 @@ const AppContextProvider = (props) => {
     loadCreditsData,
     logout,
     generateImage,
+    imageHistory,
+    setImageHistory,
+    deleteHistoryItem,
+    clearHistory,
+    downloadHistoryImage,
   };
 
   return (

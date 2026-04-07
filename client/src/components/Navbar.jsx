@@ -1,91 +1,169 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { assets } from '../assets/assets'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const Navbar = () => {
 
   const { user, setShowLogin, logout, credits } = useContext(AppContext)
-
   const navigate = useNavigate()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  const handleLogout = () => {
+    logout()
+    setDropdownOpen(false)
+  }
+
+  const navbarVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  }
+
+  const dropdownVariants = {
+    hidden: { opacity: 0, scale: 0.95, y: -10 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } }
+  }
 
   return (
-    <div className="flex items-center justify-between py-4 px-4">
+    <motion.div 
+      variants={navbarVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex items-center justify-between py-5 px-4 md:px-8 sticky top-0 z-50 glass-effect backdrop-blur-md border-b border-gray-200"
+    >
 
       {/* LOGO */}
       <Link to="/">
-        <img src={assets.logo} alt="" className="w-28 sm:w-32 lg:w-40" />
+        <motion.img 
+          src={assets.logo} 
+          alt="Imagify" 
+          className="w-28 sm:w-32 lg:w-40 cursor-pointer hover:opacity-80 transition"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
+        />
       </Link>
 
       {/* RIGHT SIDE */}
-      <div>
-
+      <div className="flex items-center gap-4 sm:gap-6">
         {user ? (
-
-          <div className="flex items-center gap-3 sm:gap-4">
-
-            {/* ✅ NEW CREDIT UI */}
-            <div
-              onClick={() => navigate('/buy')}
-              className="flex items-center gap-2 bg-white px-4 py-1.5 rounded-full border shadow-sm cursor-pointer hover:scale-105 transition"
+          <motion.div 
+            className="flex items-center gap-3 sm:gap-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {/* HISTORY LINK */}
+            <motion.p
+              onClick={() => navigate('/history')}
+              className="cursor-pointer font-semibold text-gray-700 hover:text-blue-600 transition max-sm:hidden"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <div className="bg-blue-100 p-1 rounded-full">
-                <img src={assets.credit_star} alt="" className="w-4" />
+              📸 History
+            </motion.p>
+
+            {/* CREDIT BUTTON */}
+            <motion.div
+              onClick={() => navigate('/buy')}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-full cursor-pointer shadow-lg"
+              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px rgba(37, 99, 235, 0.4)" }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              <div className="bg-blue-500 p-1.5 rounded-full">
+                <img src={assets.credit_star} alt="credits" className="w-4" />
               </div>
-              <p className="text-sm text-gray-700 font-medium">
-                Credits left : {credits}
+              <p className="text-sm font-semibold">
+                {credits} Credits
               </p>
-            </div>
+            </motion.div>
 
             {/* USER NAME */}
-            <p className="text-gray-600 max-sm:hidden">
-              Hi,  {user?.name}
-            </p>
+            <motion.p 
+              className="text-gray-700 max-sm:hidden font-medium text-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              Hi, {user?.name?.split(' ')[0]}!
+            </motion.p>
 
-            {/* PROFILE */}
-            <div className="relative group">
-              <img src={assets.profile_icon} className="w-10 drop-shadow cursor-pointer" alt="" />
+            {/* PROFILE DROPDOWN */}
+            <motion.div 
+              className="relative"
+              onHoverStart={() => setDropdownOpen(true)}
+              onHoverEnd={() => setDropdownOpen(false)}
+            >
+              <motion.img 
+                src={assets.profile_icon} 
+                className="w-10 h-10 rounded-full cursor-pointer hover:opacity-80 transition shadow-md"
+                alt="profile"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              />
 
-              {/* DROPDOWN */}
-              <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
-                <ul className="list-none m-0 p-2 bg-white rounded-md border text-sm">
-                  <li
-                    className="py-1 px-2 cursor-pointer pr-10 hover:bg-gray-100"
-                    onClick={logout}
+              {/* DROPDOWN MENU */}
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    variants={dropdownVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="absolute -right-2 top-12 z-10 mt-2"
                   >
-                    Logout
-                  </li>
-                </ul>
-              </div>
-            </div>
+                    <div className="glass-effect rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+                      <motion.button
+                        onClick={handleLogout}
+                        className="w-full py-3 px-6 text-left text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 font-semibold transition text-sm"
+                        whileHover={{ paddingLeft: 24 }}
+                      >
+                        Logout
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
         ) : (
 
-          <div className="flex items-center gap-3 sm:gap-5">
-
-            <p
+          <motion.div 
+            className="flex items-center gap-3 sm:gap-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {/* PRICING LINK */}
+            <motion.p
               onClick={() => navigate('/buy')}
-              className="cursor-pointer"
+              className="cursor-pointer font-semibold text-gray-700 hover:text-blue-600 transition"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Pricing
-            </p>
+            </motion.p>
 
-            <button
+            {/* LOGIN BUTTON */}
+            <motion.button
               onClick={() => setShowLogin(true)}
-              className="bg-zinc-800 text-white px-7 py-2 sm:px-10 text-sm rounded-full"
+              className="btn-primary"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Login
-            </button>
+            </motion.button>
 
-          </div>
+          </motion.div>
 
         )}
-
       </div>
 
-    </div>
+    </motion.div>
   )
 }
 
